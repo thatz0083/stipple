@@ -19,7 +19,7 @@ export type AskLLMResult = {
 };
 
 export const askLLM = createServerFn({ method: "POST" })
-  .inputValidator((data: LLMInput) => data)
+  .validator((data: LLMInput) => data)
   .handler(async ({ data }): Promise<AskLLMResult> => {
     const { id, adapter } = selectProvider();
     const { text } = await adapter(data);
