@@ -55,6 +55,22 @@ This is a prototype, and plenty is open. That's *why* it's open source:
 - **Saved answers only match an exact re-ask by default.** The code to recognize similar questions exists, but its model isn't loaded by default. **This is open too.**
 - No server, no database — all of it simulated in the browser.
 
+## A Pack adapts to whoever owns it
+
+Local-first is half of it. Here's the other half, and it's the part I care about more.
+
+A normal app ships as a finished thing. You open it, you use what's there, and if it doesn't fit you, you wait for the developer to change it. The app is a painting in a frame — you can look, but you can't paint on it.
+
+A Pack isn't that. A Pack ships with a base, then **bends toward the person who owns it** — not because the user tunes it by hand, but because the layer watches and tunes it for them. You have an assistant sitting outside the app now. Building one more fixed painting, when you could hand someone a sketchbook, wastes what the assistant is for.
+
+This already runs, three ways, today:
+
+- **Sudoku** remembers your last game — difficulty, mistakes, time — and picks the next board a step up or down. Play a few rounds and the Pack has found your level without you ever setting one.
+- **Memory** promotes what you keep coming back to. A preference you hit often, or feel strongly about, hardens; what you stop using decays. The Pack's sense of you sharpens with use.
+- **Study** keeps what the model makes. Ask it for a problem and that problem is saved into the Pack, not thrown away — so the longer you own the Pack, the more it's *your* Pack, not the one everyone else downloaded.
+
+That's the bet under all of it: in an AI-OS world, an app you own should get *more yours* the more you use it — and the thing that makes that happen isn't the app, it's the layer beneath it. That layer has to be shared, or nothing lines up on top of it. Which is the real reason this is open: an adaptive base only works if everyone builds on the same one.
+
 ## Your turn
 
 I'll be straight: plenty of people out-code me. But writing code isn't the edge anymore — **seeing what's worth building** is. Others write better code than I do; spotting what to build is the part I'm maybe a little better at.
