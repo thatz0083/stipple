@@ -19,6 +19,38 @@ type GeminiResponse = {
   };
 };
 
+// 429(rate limit) / 503(overloaded) / 5xx(일시적) 은 짧게 기다렸다 재시도.
+// 무료 Gemini 티어(15 RPM)에서 산발적 429 로 데모가 깨지던 걸 완화한다.
+// 재시도 소진 시 원래 Response 를 그대로 반환해 기존 에러 처리(아래)로 흐른다.
+async function fetchWithRetry(
+  url: string,
+  init: RequestInit,
+  maxRetries = 3,
+): Promise<Response> {
+  const RETRYABLE = new Set([429, 500, 502, 503, 504]);
+  let lastErr: unknown;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const res = await fetch(url, init);
+      if (RETRYABLE.has(res.status) && attempt < maxRetries) {
+        const wait = 500 * 2 ** attempt + Math.random() * 300; // 0.5s,1s,2s + jitter
+        await new Promise((r) => setTimeout(r, wait));
+        continue;
+      }
+      return res;
+    } catch (e) {
+      lastErr = e;
+      if (attempt < maxRetries) {
+        const wait = 500 * 2 ** attempt + Math.random() * 300;
+        await new Promise((r) => setTimeout(r, wait));
+        continue;
+      }
+      throw lastErr;
+    }
+  }
+  throw lastErr ?? new Error("fetchWithRetry: exhausted");
+}
+
 export async function geminiAdapter(input: LLMInput): Promise<LLMOutput> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
@@ -68,7 +100,7 @@ export async function geminiAdapter(input: LLMInput): Promise<LLMOutput> {
     },
   };
 
-  const res = await fetch(`${endpoint}?key=${apiKey}`, {
+  const res = await fetchWithRetry(`${endpoint}?key=${apiKey}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
