@@ -75,26 +75,8 @@ const STUDY_GENERIC = ["문제", "퀴즈", "테스트", "problem", "quiz", "test
 // 같은 다어 / 이름 형식만 — 단어 "tuna" / "tofu" / "pork" 단독은 식문화 무관
 // 발화 ("tuna fishing" / "pork barrel") 충돌 위험으로 제외.
 const COOKING_RECIPE_KEYWORDS: Record<string, string[]> = {
-  "baek-kimchi-jjigae": [
-    "김치찌개",
-    "김치",
-    "찌개",
-    "백종원",
-    "돼지",
-    "kimchi stew",
-    "kimchi jjigae",
-    "baek",
-  ],
-  "tuna-kimchi-jjigae": [
-    "김치찌개",
-    "김치",
-    "찌개",
-    "참치",
-    "두부",
-    "tuna kimchi",
-    "tuna kimchi stew",
-    "tuna jjigae",
-  ],
+  bulgogi: ["불고기", "소불고기", "bulgogi"],
+  bibimbap: ["비빔밥", "나물비빔밥", "채소비빔밥", "bibimbap"],
 };
 
 // Cooking-domain substrings — any single hit counts as a cooking signal.
@@ -115,16 +97,11 @@ const COOKING_DOMAIN = [
   "cook",
   "recipe",
   "조리",
-  "찌개",
-  "국",
-  "밥",
-  "면",
   "반찬",
-  "디저트",
   "재료",
   "양념",
-  "백종원",
-  "kimchi",
+  "불고기",
+  "비빔밥",
   "korean food",
   "korean recipe",
 ];
@@ -397,6 +374,11 @@ function combineScores(
   vectorKey: string,
 ): number {
   if (!queryVec) return keywordScore;
+  // 키워드 신호가 전혀 없으면(도메인도 specific도 0점) 임베딩만으로
+  // 끌어올리지 않는다. 도메인 밖 입력("cilantro")이 엉뚱한 pack entry
+  // (Trigonometry)에 허위 임베딩 유사도로 걸려 억지 매칭되던 회귀 차단 —
+  // 모르는 입력은 cloud로 흘려보낸다 ("로컬은 확실한 것만").
+  if (keywordScore === 0) return 0;
   const stored = packVectorCache.get(vectorKey);
   if (!stored) return keywordScore;
   const sim = cosineSimilarity(queryVec, stored);

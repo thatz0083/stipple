@@ -3,24 +3,23 @@ import type { PackRecipe } from "@/lib/dots-data";
 export type Recipe = PackRecipe;
 
 // Kept as a default export for any legacy imports.
-export const KIMCHI_STEW: Recipe = {
-  id: "baek-kimchi-jjigae",
-  title: "백종원식 김치찌개",
+export const BULGOGI: Recipe = {
+  id: "bulgogi",
+  title: "불고기",
   serves: "2인분",
-  total: "약 30분",
+  total: "약 25분",
   ingredients: [
-    { item: "묵은지", amount: "1/4포기" },
-    { item: "돼지고기 앞다리살", amount: "200g" },
-    { item: "두부", amount: "1/2모" },
+    { item: "소고기 (불고기감)", amount: "300g" },
+    { item: "양파", amount: "1/2개" },
     { item: "대파", amount: "1대" },
+    { item: "간장 양념", amount: "3 큰술" },
   ],
   steps: [
-    { t: "고기를 먼저 볶는다.", minutes: 4 },
-    { t: "김치를 넣고 같이 볶는다.", minutes: 5 },
-    { t: "물을 붓고 끓인다.", minutes: 15 },
-    { t: "두부와 대파를 올려 마무리.", minutes: 5 },
+    { t: "양념을 만들어 고기를 재운다.", minutes: 20 },
+    { t: "센 불에 양파와 볶는다.", minutes: 6 },
+    { t: "대파를 넣고 마무리.", minutes: 2 },
   ],
-  tip: "설탕 한 꼬집이 신맛을 잡아줘.",
+  tip: "배를 갈아 넣으면 고기가 연해져.",
 };
 
 // Phase EN-fix C: lang === "en" 시 EN 데이터 필드 (titleEn / ingredientsEn /

@@ -71,16 +71,13 @@ export const PACKS: Pack[] = [
     behavior:
       "음식 질문을 재료·조리법·타이밍·팁 카드로 재조립해. 매운 정도와 인분 수 같은 기호도 기억해 다음 추천에 반영.",
     triggers: [
-      "recipe",
-      "cook",
-      "stew",
-      "kimchi",
-      "pasta",
-      "ingredients",
-      "김치찌개",
-      "찌개",
+      "불고기",
+      "bulgogi",
+      "비빔밥",
+      "bibimbap",
       "요리",
       "레시피",
+      "recipe",
     ],
     voice: "요리 전문가",
     voiceEn: "Cooking expert",
@@ -102,8 +99,8 @@ export const PACKS: Pack[] = [
       "- Re-frame even vague questions through food, meals, or groceries.",
     ].join("\n"),
     contents: [
-      { kind: "cooking-recipe", recipeId: "baek-kimchi-jjigae" },
-      { kind: "cooking-recipe", recipeId: "tuna-kimchi-jjigae" },
+      { kind: "cooking-recipe", recipeId: "bulgogi" },
+      { kind: "cooking-recipe", recipeId: "bibimbap" },
     ],
     // V5.0 lite Phase I-2: cooking pack은 레시피·요리법·음식 도메인. 맛집·
     // 지역·배달·건강 정보 누수 차단 (Tei 박은 "짜장면 ... 맛집 ... 배달"
@@ -227,7 +224,7 @@ export type Route = "local" | "memory" | "deep";
 export const LOCAL_MEMORY = {
   recentTopics: ["점심 메뉴", "요리", "공부"],
   preferences: ["김치찌개", "된장찌개"],
-  savedRecipeTitles: ["백종원식 김치찌개", "참치김치찌개"],
+  savedRecipeTitles: ["불고기", "비빔밥"],
 };
 
 export type SavedRecipe = {
@@ -240,18 +237,18 @@ export type SavedRecipe = {
 
 export const SAVED_RECIPES: SavedRecipe[] = [
   {
-    id: "baek-kimchi-jjigae",
-    title: "백종원식 김치찌개",
+    id: "bulgogi",
+    title: "불고기",
     mentioned: "2주 전에 저장",
-    note: "돼지고기 앞다리살에 설탕 한 꼬집 들어가는 버전.",
-    matches: ["kimchi", "김치", "찌개", "백종원", "돼지"],
+    note: "배를 갈아 넣어 고기를 연하게 하는 간장 양념 버전.",
+    matches: ["bulgogi", "불고기", "소고기", "간장", "양념"],
   },
   {
-    id: "tuna-kimchi-jjigae",
-    title: "참치김치찌개",
+    id: "bibimbap",
+    title: "비빔밥",
     mentioned: "지난주에 저장",
-    note: "참치캔이랑 두부로 빨리 끓이는 평일 저녁용.",
-    matches: ["kimchi", "김치", "찌개", "참치", "두부"],
+    note: "고기 없이 나물만으로 완성하는 색색 한 그릇.",
+    matches: ["bibimbap", "비빔밥", "나물", "고추장", "계란"],
   },
 ];
 
@@ -302,248 +299,148 @@ export type PackRecipe = {
 
 export const COOKING_RECIPES: PackRecipe[] = [
   {
-    id: "baek-kimchi-jjigae",
-    title: "백종원식 김치찌개",
+    id: "bulgogi",
+    title: "불고기",
     serves: "2인분",
-    total: "약 30분",
+    total: "약 25분 (재우기 20분 별도)",
     ingredients: [
-      { item: "묵은지", amount: "1/4포기, 큼직하게" },
-      { item: "돼지고기 앞다리살", amount: "200g" },
-      { item: "두부", amount: "1/2모" },
-      { item: "대파", amount: "1대" },
+      { item: "소고기 (불고기감, 등심)", amount: "300g, 얇게" },
       { item: "양파", amount: "1/2개" },
-      { item: "설탕", amount: "1/2 작은술" },
-      { item: "고춧가루", amount: "1 큰술" },
-      { item: "물", amount: "3컵" },
+      { item: "대파", amount: "1대" },
+      { item: "간장", amount: "3 큰술" },
+      { item: "설탕", amount: "1 큰술" },
+      { item: "배 (간 것)", amount: "2 큰술" },
+      { item: "다진 마늘", amount: "1 큰술" },
+      { item: "참기름", amount: "1 큰술" },
+      { item: "후추", amount: "약간" },
     ],
     steps: [
-      { t: "냄비에 돼지고기를 먼저 볶아 기름을 낸다.", minutes: 4 },
-      { t: "묵은지와 양파를 넣고 같이 볶는다.", minutes: 5 },
-      { t: "물을 붓고 설탕, 고춧가루를 넣어 끓인다.", minutes: 15 },
-      { t: "두부와 대파를 넣고 한 번 더 끓인다.", minutes: 5 },
+      { t: "간장·설탕·배·마늘·참기름·후추를 섞어 양념장을 만든다.", minutes: 3 },
+      { t: "얇게 썬 소고기를 양념에 20분 재운다.", minutes: 20 },
+      { t: "센 불에 양파와 함께 볶는다.", minutes: 6 },
+      { t: "대파를 넣고 한 번 더 볶아 마무리.", minutes: 2 },
     ],
-    tip: "설탕 한 꼬집이 김치의 신맛을 잡아줘. 너무 많이 넣으면 안 돼.",
-    titleEn: "Baek-style Kimchi-jjigae (Pork Kimchi Stew)",
+    tip: "배를 갈아 넣으면 고기가 연해지고 단맛이 자연스러워. 센 불에 빠르게 볶아야 질기지 않아.",
+    titleEn: "Bulgogi (Korean Marinated Beef)",
     servesEn: "Serves 2",
-    totalEn: "~30 min",
+    totalEn: "~25 min (plus 20 min marinating)",
     ingredientsEn: [
-      { item: "Aged kimchi (mukeunji)", amount: "1/4 head, roughly torn" },
-      { item: "Pork shoulder", amount: "200g, thinly sliced" },
-      { item: "Tofu", amount: "1/2 block" },
-      { item: "Green onion", amount: "1 large stalk" },
+      { item: "Beef (thinly sliced, sirloin)", amount: "300g" },
       { item: "Onion", amount: "1/2" },
-      { item: "Sugar", amount: "1/2 tsp" },
-      { item: "Gochugaru (Korean red pepper flakes)", amount: "1 tbsp" },
-      { item: "Water", amount: "3 cups" },
+      { item: "Green onion", amount: "1 large stalk" },
+      { item: "Soy sauce", amount: "3 tbsp" },
+      { item: "Sugar", amount: "1 tbsp" },
+      { item: "Grated pear", amount: "2 tbsp" },
+      { item: "Minced garlic", amount: "1 tbsp" },
+      { item: "Sesame oil", amount: "1 tbsp" },
+      { item: "Black pepper", amount: "a pinch" },
     ],
     stepsEn: [
-      { t: "Sear the pork in the pot first to render fat.", minutes: 4 },
-      { t: "Add the aged kimchi and onion; stir-fry together.", minutes: 5 },
-      { t: "Pour in water, add sugar and gochugaru, bring to a boil.", minutes: 15 },
-      { t: "Add tofu and green onion; simmer once more.", minutes: 5 },
+      { t: "Mix soy sauce, sugar, pear, garlic, sesame oil, and pepper into a marinade.", minutes: 3 },
+      { t: "Marinate the thinly sliced beef for 20 minutes.", minutes: 20 },
+      { t: "Stir-fry over high heat with the onion.", minutes: 6 },
+      { t: "Add green onion and stir-fry once more to finish.", minutes: 2 },
     ],
-    tipEn: "A pinch of sugar tames the kimchi's sharpness — don't overdo it.",
-    // V5.0 lite Phase A facet — baek-kimchi-jjigae를 김치찌개의 canonical
-    // entry로 채움. tuna-kimchi-jjigae는 동률 score일 때 baek가 head로 잡혀
-    // 이 facet이 노출됨 (정확 entry 매칭은 Phase B에서).
+    tipEn: "Grated pear tenderizes the beef and adds natural sweetness. Stir-fry fast over high heat so it doesn't toughen.",
     definition:
-      "김치찌개는 한국 전통 발효 찌개야. 묵은지의 발효 깊이를 끓이는 동안 끌어내, 신맛·감칠맛·매운맛이 한 그릇에 어우러지는 게 핵심이야.",
+      "불고기는 얇게 썬 소고기를 간장 양념에 재워 볶거나 구운 한국 대표 요리야. 간장·설탕·배의 균형에서 오는 단짠 양념이 핵심이야.",
     pack_context:
-      "이 팩엔 김치찌개 변형 2종(백종원식, 참치)이 들어 있어. 김치볶음밥, 된장찌개 같은 다른 한식은 cloud나 별도 팩으로 가야 해.",
+      "이 팩엔 누구나 아는 한식 2종(불고기, 비빔밥)이 들어 있어. 다른 한식은 cloud나 별도 팩으로 가.",
     how_to:
-      "묵은지 1/4포기와 돼지고기 200g을 함께 볶아 기름을 낸 뒤 물 3컵으로 끓여. 설탕 한 꼬집과 고춧가루로 신맛을 잡고, 두부·대파를 마지막에 넣어. 약 30분.",
-    examples: ["백종원식 김치찌개", "참치김치찌개"],
-    related_terms: ["된장찌개", "순두부찌개", "부대찌개", "찌개"],
-    // V5.0 lite Phase B3d — baek는 김치찌개의 canonical entry이므로 generic
-    // "김치찌개" 호명도 baek에 매핑. 길이 desc로 정렬해 둠 (가독성, 알고리즘은
-    // 길이 비교만).
-    // B3d revision: 오타 alias "김치찌게" 제거 — 데이터에 오타를 박는 건
-    // 시스템 정직성과 충돌. 오타 처리는 미래 별도 phase (Levenshtein) 영역.
-    aliases: ["백종원 김치찌개", "김치찌개", "김찌"],
+      "간장 3·설탕 1·배 2큰술로 양념을 만들어 얇은 소고기 300g을 20분 재운 뒤, 센 불에 양파와 볶고 대파로 마무리해. 약 25분.",
+    examples: ["불고기", "비빔밥"],
+    related_terms: ["소고기", "간장", "양념", "구이"],
+    aliases: ["소불고기", "불고기볶음"],
     contexts: ["craving", "definition", "how_to", "casual"],
-    // V5.0 Phase B3c action_options — facet 별 사용자 옵션. builder가 facet
-    // kind로 lookup. 미정의 facet은 builder hardcoded fallback.
     action_options: {
       craving: [
-        {
-          kind: "show-recipe",
-          label: "만들기",
-          recipeId: "baek-kimchi-jjigae",
-          action_area: "만들기",
-        },
-        {
-          kind: "llm-call",
-          label: "시켜먹기",
-          prompt:
-            "근처 한식당이나 배달앱에서 김치찌개 잘하는 곳 후보 3곳만 추천해줘. 한국어로 짧게.",
-          action_area: "시켜먹기",
-        },
-        {
-          kind: "llm-call",
-          label: "비슷한 메뉴",
-          prompt: "김치찌개랑 비슷한 결인데 살짝 다른 한식 추천해줘. 1-2개만.",
-          action_area: "찾기",
-        },
+        { kind: "show-recipe", label: "만들기", recipeId: "bulgogi", action_area: "만들기" },
+        { kind: "llm-call", label: "비슷한 메뉴", prompt: "불고기랑 비슷한 결인데 살짝 다른 한식 추천해줘. 1-2개만.", action_area: "찾기" },
       ],
       how_to: [
-        {
-          kind: "show-recipe",
-          label: "보여줘",
-          recipeId: "baek-kimchi-jjigae",
-          action_area: "만들기",
-        },
-        {
-          kind: "llm-call",
-          label: "다른 음식",
-          prompt: "다른 요리 하나 추천해줘. 비슷한 결인데 살짝 다른 걸로.",
-          action_area: "찾기",
-        },
+        { kind: "show-recipe", label: "보여줘", recipeId: "bulgogi", action_area: "만들기" },
+        { kind: "llm-call", label: "다른 음식", prompt: "다른 요리 하나 추천해줘. 비슷한 결인데 살짝 다른 걸로.", action_area: "찾기" },
       ],
       definition: [
-        {
-          kind: "show-recipe",
-          label: "레시피 보기",
-          recipeId: "baek-kimchi-jjigae",
-          action_area: "정보",
-        },
-        {
-          kind: "llm-call",
-          label: "다른 김치찌개",
-          prompt: "김치찌개의 다른 변형(참치 외)을 알려줘. 한국어로 짧게.",
-          action_area: "찾기",
-        },
+        { kind: "show-recipe", label: "레시피 보기", recipeId: "bulgogi", action_area: "정보" },
+        { kind: "llm-call", label: "다른 한식", prompt: "불고기 말고 다른 대표 한식 알려줘. 한국어로 짧게.", action_area: "찾기" },
       ],
       casual: [
-        {
-          kind: "show-recipe",
-          label: "만들기",
-          recipeId: "baek-kimchi-jjigae",
-          action_area: "만들기",
-        },
-        {
-          kind: "llm-call",
-          label: "다른 음식",
-          prompt: "다른 요리 추천해줘. 가볍게.",
-          action_area: "찾기",
-        },
+        { kind: "show-recipe", label: "만들기", recipeId: "bulgogi", action_area: "만들기" },
+        { kind: "llm-call", label: "다른 음식", prompt: "다른 요리 추천해줘. 가볍게.", action_area: "찾기" },
       ],
     },
   },
   {
-    id: "tuna-kimchi-jjigae",
-    title: "참치김치찌개",
+    id: "bibimbap",
+    title: "비빔밥",
     serves: "2인분",
-    total: "약 20분",
+    total: "약 25분",
     ingredients: [
-      { item: "묵은지", amount: "2컵" },
-      { item: "참치캔", amount: "1캔 (기름 빼서)" },
-      { item: "두부", amount: "1/2모" },
-      { item: "대파", amount: "1대" },
-      { item: "마늘", amount: "1 큰술" },
-      { item: "고춧가루", amount: "1 큰술" },
-      { item: "물 또는 멸치육수", amount: "2.5컵" },
+      { item: "밥", amount: "2공기" },
+      { item: "시금치", amount: "1줌" },
+      { item: "콩나물", amount: "1줌" },
+      { item: "당근", amount: "1/2개, 채썰어" },
+      { item: "애호박", amount: "1/2개, 채썰어" },
+      { item: "계란", amount: "2개" },
+      { item: "고추장", amount: "2 큰술" },
+      { item: "참기름", amount: "1 큰술" },
+      { item: "통깨", amount: "약간" },
     ],
     steps: [
-      { t: "냄비에 김치, 마늘, 고춧가루를 넣고 잠깐 볶는다.", minutes: 3 },
-      { t: "육수를 붓고 끓어오르면 중불로 줄인다.", minutes: 10 },
-      { t: "참치와 두부를 넣고 더 끓인다.", minutes: 5 },
-      { t: "대파를 올려 마무리.", minutes: 1 },
+      { t: "시금치·콩나물을 데쳐 참기름·소금으로 무친다.", minutes: 8 },
+      { t: "당근·애호박을 각각 살짝 볶는다.", minutes: 6 },
+      { t: "계란을 반숙 프라이로 부친다.", minutes: 3 },
+      { t: "밥 위에 나물을 색색으로 올리고 계란·고추장·참기름을 더해 마무리.", minutes: 3 },
     ],
-    tip: "참치 기름을 빼야 국물이 깔끔해. 두부는 마지막에 넣어야 안 부서져.",
-    titleEn: "Chamchi Kimchi-jjigae (Tuna Kimchi Stew)",
+    tip: "나물은 각각 따로 무쳐야 색과 맛이 살아. 고추장은 비비기 직전에 넣어 짜지 않게 조절해.",
+    titleEn: "Bibimbap (Mixed Rice with Vegetables)",
     servesEn: "Serves 2",
-    totalEn: "~20 min",
+    totalEn: "~25 min",
     ingredientsEn: [
-      { item: "Aged kimchi (mukeunji)", amount: "2 cups" },
-      { item: "Canned tuna", amount: "1 can (oil drained)" },
-      { item: "Tofu", amount: "1/2 block" },
-      { item: "Green onion", amount: "1 large stalk" },
-      { item: "Garlic, minced", amount: "1 tbsp" },
-      { item: "Gochugaru (Korean red pepper flakes)", amount: "1 tbsp" },
-      { item: "Water or anchovy broth", amount: "2.5 cups" },
+      { item: "Cooked rice", amount: "2 bowls" },
+      { item: "Spinach", amount: "1 handful" },
+      { item: "Bean sprouts", amount: "1 handful" },
+      { item: "Carrot", amount: "1/2, julienned" },
+      { item: "Zucchini", amount: "1/2, julienned" },
+      { item: "Eggs", amount: "2" },
+      { item: "Gochujang (red chili paste)", amount: "2 tbsp" },
+      { item: "Sesame oil", amount: "1 tbsp" },
+      { item: "Toasted sesame seeds", amount: "a pinch" },
     ],
     stepsEn: [
-      { t: "Stir-fry the kimchi, garlic, and gochugaru in the pot briefly.", minutes: 3 },
-      { t: "Pour in the broth; once boiling, reduce to medium.", minutes: 10 },
-      { t: "Add the drained tuna and tofu; simmer further.", minutes: 5 },
-      { t: "Top with green onion to finish.", minutes: 1 },
+      { t: "Blanch spinach and bean sprouts; season with sesame oil and salt.", minutes: 8 },
+      { t: "Lightly stir-fry the carrot and zucchini separately.", minutes: 6 },
+      { t: "Fry the eggs sunny-side up.", minutes: 3 },
+      { t: "Arrange the vegetables over rice by color, top with egg, gochujang, and sesame oil.", minutes: 3 },
     ],
-    tipEn: "Drain the tuna oil for a clean broth. Add tofu last so it doesn't break apart.",
-    // V5.0 lite Phase A.5 facet — Cooking pack #2 entry. pack_context는 baek와
-    // 동일 텍스트 — pack scope 정보는 entry-invariant. definition / how_to는
-    // tuna 변형 고유 (통조림 활용 + 조리 시간 단축)에 맞춰 별도 작성.
+    tipEn: "Season each vegetable separately so colors and flavors stay distinct. Add gochujang right before mixing so it isn't too salty.",
     definition:
-      "참치김치찌개는 통조림 참치를 활용한 빠른 김치찌개 변형이야. 돼지고기 대신 참치캔을 써서 단백질·감칠맛은 살리되 조리 시간은 절반으로 줄인 평일 저녁용 버전이야.",
+      "비빔밥은 밥 위에 여러 나물과 계란을 색색으로 올려 고추장에 비벼 먹는 한국 대표 요리야. 고기 없이 나물만으로도 완성되는 균형 잡힌 한 그릇이야.",
     pack_context:
-      "이 팩엔 김치찌개 변형 2종(백종원식, 참치)이 들어 있어. 김치볶음밥, 된장찌개 같은 다른 한식은 cloud나 별도 팩으로 가야 해.",
+      "이 팩엔 누구나 아는 한식 2종(불고기, 비빔밥)이 들어 있어. 다른 한식은 cloud나 별도 팩으로 가.",
     how_to:
-      "묵은지 2컵과 마늘·고춧가루를 잠깐 볶은 뒤 물(또는 멸치육수) 2.5컵을 붓고 끓여. 끓어오르면 중불로 줄여 기름 뺀 참치캔과 두부를 넣고 더 끓여. 마지막에 대파. 약 20분.",
-    examples: ["백종원식 김치찌개", "참치김치찌개"],
-    related_terms: ["김치찌개", "참치", "통조림", "묵은지", "두부"],
-    // V5.0 lite Phase B3d — 참치 변형 호명 그룹. "김치찌개" 같은 generic은
-    // baek가 가져가도록 일부러 빼둠 (canonical 분리). "참치" 단독은 너무 broad
-    // (음식 전반에 등장)이라 alias 제외. "참치찌개" 단독은 자연 직관 ("참치"
-    // 들어가면 참치 entry) 으로 tuna 매핑 — Tei 의도 확정.
-    // B3d revision: 오타 alias "참치찌게" 제거 (baek와 정책 통일).
-    aliases: ["참치 김치찌개", "참치김치", "참치찌개"],
+      "시금치·콩나물을 데쳐 무치고 당근·애호박을 볶은 뒤, 밥 위에 색색으로 올려 계란·고추장·참기름을 더해 비벼. 고기 없이 나물만으로 약 25분.",
+    examples: ["불고기", "비빔밥"],
+    related_terms: ["나물", "고추장", "계란", "밥"],
+    aliases: ["나물비빔밥", "채소비빔밥"],
     contexts: ["craving", "definition", "how_to", "casual"],
-    // V5.0 Phase B3c action_options — tuna 변형에 맞춘 빠른 톤.
     action_options: {
       craving: [
-        {
-          kind: "show-recipe",
-          label: "참치로 빨리",
-          recipeId: "tuna-kimchi-jjigae",
-          action_area: "만들기",
-        },
-        {
-          kind: "llm-call",
-          label: "비슷한 빠른 음식",
-          prompt: "통조림 활용한 빠른 한식 1-2개 추천해줘. 짧게.",
-          action_area: "찾기",
-        },
+        { kind: "show-recipe", label: "만들기", recipeId: "bibimbap", action_area: "만들기" },
+        { kind: "llm-call", label: "비슷한 메뉴", prompt: "비빔밥이랑 비슷한 결인데 살짝 다른 한식 추천해줘. 1-2개만.", action_area: "찾기" },
       ],
       how_to: [
-        {
-          kind: "show-recipe",
-          label: "보여줘",
-          recipeId: "tuna-kimchi-jjigae",
-          action_area: "만들기",
-        },
-        {
-          kind: "llm-call",
-          label: "다른 음식",
-          prompt: "다른 요리 하나 추천해줘. 비슷한 결인데 살짝 다른 걸로.",
-          action_area: "찾기",
-        },
+        { kind: "show-recipe", label: "보여줘", recipeId: "bibimbap", action_area: "만들기" },
+        { kind: "llm-call", label: "다른 음식", prompt: "다른 요리 하나 추천해줘. 비슷한 결인데 살짝 다른 걸로.", action_area: "찾기" },
       ],
       definition: [
-        {
-          kind: "show-recipe",
-          label: "레시피 보기",
-          recipeId: "tuna-kimchi-jjigae",
-          action_area: "정보",
-        },
-        {
-          kind: "show-recipe",
-          label: "백종원식 보기",
-          recipeId: "baek-kimchi-jjigae",
-          action_area: "정보",
-        },
+        { kind: "show-recipe", label: "레시피 보기", recipeId: "bibimbap", action_area: "정보" },
+        { kind: "llm-call", label: "다른 한식", prompt: "비빔밥 말고 다른 대표 한식 알려줘. 한국어로 짧게.", action_area: "찾기" },
       ],
       casual: [
-        {
-          kind: "show-recipe",
-          label: "만들기",
-          recipeId: "tuna-kimchi-jjigae",
-          action_area: "만들기",
-        },
-        {
-          kind: "llm-call",
-          label: "다른 음식",
-          prompt: "다른 요리 추천해줘. 가볍게.",
-          action_area: "찾기",
-        },
+        { kind: "show-recipe", label: "만들기", recipeId: "bibimbap", action_area: "만들기" },
+        { kind: "llm-call", label: "다른 음식", prompt: "다른 요리 추천해줘. 가볍게.", action_area: "찾기" },
       ],
     },
   },
