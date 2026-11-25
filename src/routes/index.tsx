@@ -397,7 +397,7 @@ function ChatPage() {
     if (pref) {
       const userId = crypto.randomUUID();
       const asstId = crypto.randomUUID();
-      const entry = addPreference(pref.type, pref.subject);
+      const entry = addPreference(pref.type, pref.subject, text);
       // Phase EN-4: 입력 언어 기준 응답 분기. 한국어 회귀 그대로 (lang === "ko"
       // 이면 기존 톤 유지).
       const body =

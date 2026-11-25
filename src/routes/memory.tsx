@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useSyncExternalStore } from "react";
 import { Shell } from "@/components/Shell";
 import { SAVED_RECIPES } from "@/lib/dots-data";
 import {
@@ -8,6 +9,11 @@ import {
   type MemoryRecord,
 } from "@/lib/memory";
 import { useT, type Messages } from "@/lib/i18n";
+import {
+  getPreferencesSnapshot,
+  removePreference,
+  subscribePreferencesStore,
+} from "@/lib/learning/preferences-store";
 
 export const Route = createFileRoute("/memory")({
   head: () => ({
@@ -189,6 +195,13 @@ function MemoryPage() {
   const { memories, archives } = useMemoryStore();
   const now = Date.now();
   const mem = useT().memory;
+  // What Stipple has learned from the user's own sentences — newest first.
+  const prefsRaw = useSyncExternalStore(
+    subscribePreferencesStore,
+    getPreferencesSnapshot,
+    getPreferencesSnapshot,
+  );
+  const known = [...prefsRaw].sort((a, b) => b.lastSeenAt - a.lastSeenAt);
 
   const shelves: Shelf[] = [
     {
@@ -237,6 +250,57 @@ function MemoryPage() {
         </header>
 
         <div className="px-8 md:px-12 py-10 max-w-3xl space-y-3">
+          <section className="rounded-xl border border-border bg-card overflow-hidden slide-in">
+            <div className="px-5 py-4 flex items-baseline justify-between border-b border-border">
+              <div>
+                <h2 className="text-[15px] font-semibold tracking-tight text-ink">
+                  {mem.known.name}
+                </h2>
+                <p className="text-[12px] text-ink-soft mt-0.5">{mem.known.desc}</p>
+              </div>
+              <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-soft shrink-0 ml-3">
+                {mem.known.badge}
+              </span>
+            </div>
+            <ul className="divide-y divide-border">
+              {known.length === 0 ? (
+                <li className="px-5 py-4 text-[13px] text-ink-soft/80 italic">{mem.known.empty}</li>
+              ) : (
+                known.map((k) => (
+                  <li key={k.id} className="px-5 py-3 flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="text-[13.5px] text-ink">
+                        <span className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-ink-soft mr-2">
+                          {k.type === "like" ? mem.known.like : mem.known.dislike}
+                        </span>
+                        {k.subject}
+                      </div>
+                      {k.sourceText && (
+                        <div className="mt-1 text-[12px] text-ink-soft truncate">
+                          {mem.known.from} “{k.sourceText}”
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      {k.count > 1 && (
+                        <span className="font-mono text-[10.5px] text-ink-soft">
+                          {mem.known.times(k.count)}
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => removePreference(k.id)}
+                        className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-ink-soft hover:text-ink"
+                      >
+                        {mem.known.remove}
+                      </button>
+                    </div>
+                  </li>
+                ))
+              )}
+            </ul>
+          </section>
+
           {shelves.map((shelf) => (
             <section
               key={shelf.key}
