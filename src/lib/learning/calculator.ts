@@ -47,8 +47,68 @@ function rewriteLogConvention(text: string): string {
     .replace(/__LOG_NAT__\(/g, "log(");
 }
 
+// Spoken-style math → expression. "What is 15% of 80?" used to fall through to
+// the cloud because the raw sentence is not a mathjs expression. This only
+// rewrites well-known phrasings; anything it does not recognise is left as-is
+// and still has to pass looksLikeCalc + mathjs, so ordinary sentences
+// ("what is love?") keep going to the normal routing.
+const NUM = String.raw`(-?\d+(?:\.\d+)?)`;
+
+// Strips only the wrapper words ("What is … ?"), leaving the math phrase the
+// user actually wrote. This is what gets echoed back ("15% of 80 = 12").
+function stripWrapper(input: string): string {
+  let t = input.trim();
+  // Trailing "?", ".", "=" — keep "!" (factorial).
+  t = t.replace(/[?.=\s]+$/u, "");
+  // Leading question / command words (EN + KO).
+  t = t.replace(
+    /^(?:what\s+is|what's|whats|how\s+much\s+is|calculate|compute|solve|evaluate)\s+/i,
+    "",
+  );
+  t = t.replace(/^convert\s+/i, "");
+  t = t.replace(
+    /\s*(?:은|는|이|가)?\s*(?:얼마(?:야|예요|인가요|지|니)?|뭐야|계산해\s*줘|계산)$/u,
+    "",
+  );
+
+  return t.trim();
+}
+
+function normalizeSpokenMath(wrapperStripped: string): string {
+  let t = wrapperStripped;
+
+  // Percent of: "15% of 80", "15 percent of 80", "80의 15%", "80의 15퍼센트".
+  t = t.replace(new RegExp(`${NUM}\\s*(?:%|percent)\\s+of\\s+${NUM}`, "i"), "($1/100)*$2");
+  t = t.replace(new RegExp(`${NUM}\\s*의\\s*${NUM}\\s*(?:%|퍼센트|프로)`, "u"), "$1*($2/100)");
+
+  // Powers and roots.
+  t = t.replace(new RegExp(`${NUM}\\s+to\\s+the\\s+power\\s+of\\s+${NUM}`, "i"), "$1^$2");
+  t = t.replace(new RegExp(`${NUM}\\s+squared`, "i"), "$1^2");
+  t = t.replace(new RegExp(`${NUM}\\s+cubed`, "i"), "$1^3");
+  t = t.replace(new RegExp(`(?:the\\s+)?square\\s+root\\s+of\\s+${NUM}`, "i"), "sqrt($1)");
+  t = t.replace(new RegExp(`${NUM}\\s*의\\s*${NUM}\\s*(?:제곱|승)`, "u"), "$1^$2");
+  t = t.replace(new RegExp(`${NUM}\\s*의\\s*제곱근`, "u"), "sqrt($1)");
+  t = t.replace(new RegExp(`${NUM}\\s*의\\s*제곱`, "u"), "$1^2");
+  t = t.replace(new RegExp(`루트\\s*${NUM}`, "u"), "sqrt($1)");
+
+  // Word operators between two numbers.
+  const WORD_OPS: Array<[string, string]> = [
+    ["times|multiplied\\s+by|곱하기", "*"],
+    ["divided\\s+by|over|나누기", "/"],
+    ["plus|더하기", "+"],
+    ["minus|빼기", "-"],
+  ];
+  for (const [words, op] of WORD_OPS) {
+    t = t.replace(new RegExp(`${NUM}\\s*(?:${words})\\s*${NUM}`, "giu"), `$1 ${op} $2`);
+  }
+  return t.trim();
+}
+
 export function parseCalculation(input: string): CalcResult | null {
-  const text = input.trim();
+  const original = input.trim();
+  if (!original) return null;
+  const display = stripWrapper(original);
+  const text = normalizeSpokenMath(display);
   if (!text) return null;
   if (!looksLikeCalc(text)) return null;
 
@@ -81,7 +141,8 @@ export function parseCalculation(input: string): CalcResult | null {
     } else {
       result = format(value, { precision: 14 });
     }
-    return { expression: text, result };
+    // Echo the user's own phrase without the "What is … ?" wrapper.
+    return { expression: display || original, result };
   } catch {
     return null;
   }
