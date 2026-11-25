@@ -73,4 +73,8 @@ export type ConversationSummary = {
   sourceMessagesCount: number;
   // 입력으로 들어간 history의 char 길이 (토큰 proxy). 비용 추정 + 디버그.
   tokensUsed: number;
+  // Provider-reported tokens spent generating this summary (a hidden cloud
+  // call Stipple makes). Counted as Stipple overhead in measurement.
+  usageInputTokens?: number;
+  usageOutputTokens?: number;
 };

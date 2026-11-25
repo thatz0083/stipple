@@ -27,7 +27,8 @@ import { generateWithWebLLM, getWebLLMStatus, type WebLLMStatus } from "@/lib/we
 // Phase M0-5: Memory Activation — cloud 호출 시 사용자 선호 컨텍스트 inject.
 import { getLastSudokuPlay, listPreferences } from "@/lib/learning";
 import { askLLM } from "./llm";
-import type { LLMHistoryTurn, ProviderId } from "./providers/types";
+import { getCallOverride } from "./override";
+import type { LLMHistoryTurn, LLMUsage, ProviderId } from "./providers/types";
 // V5.0 Phase P-2: 통일 system prompt 빌더. compose + dispatch 2-layer 통합.
 import { buildSystemPrompt } from "./system-prompt";
 
@@ -71,6 +72,10 @@ export type DispatchInput = {
   // Phase EN-1: 입력 언어. "en" → buildSystemPrompt가 모든 섹션을 영어 미러로
   // 교체. 미박힘 또는 "ko" → 기존 한국어 그대로.
   lang?: "ko" | "en";
+  // Measurement / side-by-side: pin this call to one provider and temperature.
+  // Omitted → server default (LLM_PROVIDER), same as before.
+  provider?: ProviderId;
+  temperature?: number;
 };
 
 export type DispatchResult = {
@@ -78,6 +83,13 @@ export type DispatchResult = {
   // "webllm" kept for the dormant on-device branch; cloud answers carry the
   // actual ProviderId chosen by LLM_PROVIDER (gemini | openai | claude | grok).
   provider: "webllm" | ProviderId;
+  // Cloud answers only: concrete model, provider-reported token counts, and
+  // the size of the system prompt Stipple added (charter + pack + memory +
+  // USER_CONTEXT) so its overhead can be accounted for honestly.
+  model?: string;
+  usage?: LLMUsage;
+  truncated?: boolean;
+  systemPromptChars?: number;
 };
 
 // V5.0 Phase P-2: 헌법·디시플린 / RECOMMENDATION_HINTS / hasRecommendationIntent
@@ -98,14 +110,26 @@ async function callLLM(
   systemPrompt: string | undefined,
   history: DispatchTurn[],
 ): Promise<DispatchResult> {
-  const { text, provider } = await askLLM({
+  // A measurement run pins provider + temperature for every Stipple call.
+  const override = getCallOverride();
+  const { text, provider, model, usage, truncated } = await askLLM({
     data: {
       userMessage: input.userMessage,
       systemPrompt,
       history: history as LLMHistoryTurn[],
+      provider: input.provider ?? override.provider,
+      temperature: input.temperature ?? override.temperature,
+      maxOutputTokens: override.maxOutputTokens,
     },
   });
-  return { text, provider };
+  return {
+    text,
+    provider,
+    model,
+    usage,
+    truncated,
+    systemPromptChars: systemPrompt?.length ?? 0,
+  };
 }
 
 async function callWebLLM(

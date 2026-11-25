@@ -1,0 +1,6 @@
+# scenario-pref-new-session-v1 PART B — probes in a NEW thread after reload (P1–P5).
+What should I cook for dinner tonight?
+Suggest a restaurant dish I should order at a Thai place.
+Plan a three-dish menu for a small dinner with friends.
+What's a good snack to bring on a hike?
+What do I like and dislike?

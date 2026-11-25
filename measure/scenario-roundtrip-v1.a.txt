@@ -1,0 +1,15 @@
+# scenario-roundtrip-v1 PART A — run on PROVIDER X. An ordinary conversation;
+# nothing is "taught". After this: new thread, reload the page, switch the panel
+# to PROVIDER Y, run PART B. Persona is fictional.
+Ugh, long day. I've got a big presentation on Friday and I barely slept last night.
+It's for a client pitch. I'm a product designer, and I always get nervous speaking in front of people.
+Can you give me a simple structure for a 10-minute pitch?
+Thanks. Keep answers short like that, I don't have the energy for long ones today.
+My dog Miso has been restless too, I think she picks up on my stress.
+What's a quick way to calm down before speaking?
+I'll try that. Honestly I'd rather be hiking, that's the only thing that really clears my head.
+I usually go early in the morning, I'm useless at night.
+Any tips for making slides less cluttered?
+Good. By the way, I can't stand horror movies, my partner keeps trying to make me watch them.
+I'm more into old jazz records lately. Just got a Bill Evans one.
+Okay, I should get back to work. Wish me luck for Friday.

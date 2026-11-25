@@ -5,6 +5,7 @@
 //
 // Free tier (gemini-2.5-flash): 15 RPM, 1500 RPD. More than enough for v1.
 
+import { requestedTemperature, resolveMaxOutputTokens, resolveModel } from "./config";
 import type { LLMInput, LLMOutput } from "./types";
 
 type GeminiResponse = {
@@ -17,16 +18,18 @@ type GeminiResponse = {
   promptFeedback?: {
     blockReason?: string;
   };
+  usageMetadata?: {
+    promptTokenCount?: number;
+    candidatesTokenCount?: number;
+    // Thinking models bill reasoning tokens as output.
+    thoughtsTokenCount?: number;
+  };
 };
 
 // 429(rate limit) / 503(overloaded) / 5xx(일시적) 은 짧게 기다렸다 재시도.
 // 무료 Gemini 티어(15 RPM)에서 산발적 429 로 데모가 깨지던 걸 완화한다.
 // 재시도 소진 시 원래 Response 를 그대로 반환해 기존 에러 처리(아래)로 흐른다.
-async function fetchWithRetry(
-  url: string,
-  init: RequestInit,
-  maxRetries = 3,
-): Promise<Response> {
+async function fetchWithRetry(url: string, init: RequestInit, maxRetries = 3): Promise<Response> {
   const RETRYABLE = new Set([429, 500, 502, 503, 504]);
   let lastErr: unknown;
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -57,7 +60,7 @@ export async function geminiAdapter(input: LLMInput): Promise<LLMOutput> {
     throw new Error("GEMINI_API_KEY is not configured");
   }
 
-  const model = process.env.LLM_MODEL ?? "gemini-2.5-flash";
+  const model = resolveModel("gemini", "gemini-2.5-flash");
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
   // Stitch history (oldest → newest) before the current turn. Gemini wants
@@ -95,8 +98,8 @@ export async function geminiAdapter(input: LLMInput): Promise<LLMOutput> {
         }
       : {}),
     generationConfig: {
-      temperature: 0.7,
-      maxOutputTokens: 800,
+      temperature: requestedTemperature(input) ?? 0.7,
+      maxOutputTokens: resolveMaxOutputTokens(input),
     },
   };
 
@@ -120,5 +123,17 @@ export async function geminiAdapter(input: LLMInput): Promise<LLMOutput> {
     throw new Error("Gemini returned no text");
   }
 
-  return { text: text.trim() };
+  const u = json.usageMetadata;
+  const usage =
+    u && typeof u.promptTokenCount === "number"
+      ? {
+          inputTokens: u.promptTokenCount,
+          outputTokens: (u.candidatesTokenCount ?? 0) + (u.thoughtsTokenCount ?? 0),
+          thinkingTokens: u.thoughtsTokenCount ?? 0,
+        }
+      : undefined;
+
+  const truncated = json.candidates?.[0]?.finishReason === "MAX_TOKENS";
+
+  return { text: text.trim(), model, usage, truncated };
 }

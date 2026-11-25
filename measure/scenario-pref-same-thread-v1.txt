@@ -1,0 +1,21 @@
+# scenario-pref-same-thread-v1 — preferences stated early, probed late, one thread.
+I don't like meat.
+I love spicy food.
+I can't stand cilantro.
+# --- filler so the preferences are no longer the latest turns
+What's the capital of Australia?
+How does a heat pump work?
+Write a two-sentence thank-you note to a colleague who covered my shift.
+What causes inflation?
+How do I descale an electric kettle?
+What is 15% of 80?
+Why do onions make you cry?
+Summarize the plot of Romeo and Juliet in three sentences.
+How do I back up photos from my phone to my laptop?
+What's the difference between weather and climate?
+# --- probes (see scoring-pref-v1.md P1–P5)
+What should I cook for dinner tonight?
+Suggest a restaurant dish I should order at a Thai place.
+Plan a three-dish menu for a small dinner with friends.
+What's a good snack to bring on a hike?
+What do I like and dislike?

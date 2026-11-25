@@ -1,0 +1,11 @@
+# scenario-roundtrip-v1 PART B — run on PROVIDER Y (a different company's model).
+# New thread, page reloaded. First half probes what was said on X; second half
+# reveals NEW things on Y. After this: new thread, reload, switch BACK to X, run PART C.
+Hey, I'm back.
+Recommend a movie for tonight.
+What's a good time for me to schedule a workout?
+The pitch went well, by the way. The client signed.
+I think I'm finally over the nerves. A colleague wants me to run a workshop next.
+I've also started learning guitar, mostly because of the jazz thing.
+My partner's birthday is next week and I have no idea what to get. She loves horror movies, unlike me.
+Any quick tips for a first-time workshop host?

@@ -15,6 +15,7 @@ import {
 } from "@/lib/dots-data";
 import { step } from "@/lib/conversation-engine";
 import {
+  getActiveThread,
   appendMessage,
   createThread,
   markRecipeServed,
@@ -77,6 +78,8 @@ import {
 import { addUserSATProblem, getUserSATProblems } from "@/lib/packs/study/user-store";
 import { buildSATMathDummy, buildSATMathFromLLM } from "@/lib/packs/study/parse-llm";
 import { addDemoTrace } from "@/lib/demo/trace";
+import type { ChatHooks } from "@/lib/demo/measure";
+import { MeasurePanel } from "@/components/MeasurePanel";
 import { useMemoryStore } from "@/lib/memory";
 import type { ConversationSummary } from "@/lib/memory";
 // V5.0 lite Phase I-4: 도메인 인지 layer. matchPackContent 호출 전에
@@ -1360,7 +1363,17 @@ function ChatPage() {
       cloudMode: true,
       // Phase EN-1: 사용자 입력 언어 → 영어 system prompt 분기.
       lang,
-    }).then(({ payload, provider, summaryUsed, summaryGenerated }) => {
+    }).then(({
+      payload,
+      provider,
+      model,
+      usage,
+      systemPromptChars,
+      overheadInputTokens,
+      overheadOutputTokens,
+      summaryUsed,
+      summaryGenerated,
+    }) => {
       renderPayload(payload, provider);
       // Stage 3 trace는 composeAnswer 결과가 돌아온 시점에. provider가
       // 박혔으면 클라우드 호출 성공, 없으면 catch path (캔드 fallback)인데
@@ -1377,6 +1390,13 @@ function ChatPage() {
         route: "cloud",
         externalCall: true,
         provider: provider ?? "none",
+        model,
+        inputTokens: usage?.inputTokens,
+        outputTokens: usage?.outputTokens,
+        thinkingTokens: usage?.thinkingTokens,
+        systemPromptChars,
+        overheadInputTokens,
+        overheadOutputTokens,
         packId: composePack?.id,
         packName: composePack?.name,
         latencyMs: Date.now() - startTime,
@@ -1574,6 +1594,11 @@ function ChatPage() {
               route: "cloud",
               externalCall: true,
               provider: res.provider,
+              model: res.model,
+              inputTokens: res.usage?.inputTokens,
+              outputTokens: res.usage?.outputTokens,
+              thinkingTokens: res.usage?.thinkingTokens,
+              systemPromptChars: res.systemPromptChars,
               packName: matchedPack?.name,
               latencyMs: Date.now() - clickStart,
               reason: postAction
@@ -1598,7 +1623,17 @@ function ChatPage() {
           // prompt 도 "ko" 오판정 → KO charter → 한국어 응답 회귀 차단.
           lang: sourceLang,
         })
-          .then(({ payload, provider, summaryUsed, summaryGenerated }) => {
+          .then(({
+      payload,
+      provider,
+      model,
+      usage,
+      systemPromptChars,
+      overheadInputTokens,
+      overheadOutputTokens,
+      summaryUsed,
+      summaryGenerated,
+    }) => {
             onDoneTextWithProvider(payload.kind === "text" ? payload.text : "", provider);
             addDemoTrace({
               input: option.label,
@@ -1606,6 +1641,13 @@ function ChatPage() {
               route: "cloud",
               externalCall: true,
               provider: provider ?? "none",
+              model,
+              inputTokens: usage?.inputTokens,
+              outputTokens: usage?.outputTokens,
+              thinkingTokens: usage?.thinkingTokens,
+              systemPromptChars,
+              overheadInputTokens,
+              overheadOutputTokens,
               packId: matchedPack?.id,
               packName: matchedPack?.name,
               latencyMs: Date.now() - clickStart,
@@ -1644,6 +1686,55 @@ function ChatPage() {
     return turns;
   }
 
+  // ---- Measurement (dev only, ?measure=1). The panel drives the REAL send()
+  // so a measured turn takes exactly the path a typed turn takes. Refs keep
+  // the latest send/busy visible to the long-running loop across re-renders.
+  const sendRef = useRef(send);
+  sendRef.current = send;
+  const busyRef = useRef(busy);
+  busyRef.current = busy;
+  const measureHooks: ChatHooks = {
+    submitAndWait: async (text: string) => {
+      const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+      const deadline = Date.now() + 120_000;
+      // A previous turn may still be settling.
+      while (busyRef.current && Date.now() < deadline) await sleep(100);
+      const before = getActiveThread().messages.length;
+      await sendRef.current(text);
+      // Idle = user message landed, busy cleared, no pending bubble — and it
+      // stays that way for a short settle window.
+      let stableSince = 0;
+      for (;;) {
+        if (Date.now() > deadline) throw new Error("timeout waiting for the chat to settle");
+        const msgs = getActiveThread().messages;
+        const idle =
+          msgs.length > before &&
+          !busyRef.current &&
+          !msgs.some((m) => m.role === "assistant" && m.pending);
+        if (idle) {
+          if (!stableSince) stableSince = Date.now();
+          if (Date.now() - stableSince >= 400) {
+            const added = msgs.slice(before).filter((m) => m.role === "assistant");
+            const answer = added
+              .map((m) => (m.role === "assistant" ? (m.text ?? "") : ""))
+              .filter(Boolean)
+              .join("\n");
+            return { answer };
+          }
+        } else {
+          stableSince = 0;
+        }
+        await sleep(100);
+      }
+    },
+  };
+  // Decided after mount so server and client render the same first frame.
+  const [showMeasure, setShowMeasure] = useState(false);
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    setShowMeasure(new URLSearchParams(window.location.search).get("measure") === "1");
+  }, []);
+
   if (!thread) return null;
 
   // Quick-entry pack row (top 3) — shown on mobile as shortcuts.
@@ -1666,6 +1757,7 @@ function ChatPage() {
         summaryMarkerAfterId={summaryMarkerAfterId}
         activeSummary={activeSummary}
       />
+      {showMeasure && <MeasurePanel hooks={measureHooks} />}
     </Shell>
   );
 }

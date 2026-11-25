@@ -5,10 +5,12 @@
 // `choices[0].message.content` response). So both adapters route through one
 // function; only the base URL, key, model, and display label differ. See grok.ts.
 
+import { requestedTemperature, resolveMaxOutputTokens, resolveModel } from "./config";
 import type { LLMInput, LLMOutput } from "./types";
 
 type OpenAIChatResponse = {
-  choices?: Array<{ message?: { content?: string } }>;
+  choices?: Array<{ message?: { content?: string }; finish_reason?: string }>;
+  usage?: { prompt_tokens?: number; completion_tokens?: number };
   error?: { message?: string };
 };
 
@@ -37,8 +39,8 @@ export async function openaiCompatibleAdapter(
     body: JSON.stringify({
       model: cfg.model,
       messages,
-      temperature: 0.7,
-      max_tokens: 800,
+      temperature: requestedTemperature(input) ?? 0.7,
+      max_tokens: resolveMaxOutputTokens(input),
     }),
   });
 
@@ -53,7 +55,15 @@ export async function openaiCompatibleAdapter(
     throw new Error(`${cfg.label} returned no text`);
   }
 
-  return { text: text.trim() };
+  const u = json.usage;
+  const usage =
+    u && typeof u.prompt_tokens === "number"
+      ? { inputTokens: u.prompt_tokens, outputTokens: u.completion_tokens ?? 0 }
+      : undefined;
+
+  const truncated = json.choices?.[0]?.finish_reason === "length";
+
+  return { text: text.trim(), model: cfg.model, usage, truncated };
 }
 
 export async function openaiAdapter(input: LLMInput): Promise<LLMOutput> {
@@ -61,6 +71,6 @@ export async function openaiAdapter(input: LLMInput): Promise<LLMOutput> {
     label: "OpenAI",
     baseUrl: "https://api.openai.com/v1",
     apiKey: process.env.OPENAI_API_KEY,
-    model: process.env.LLM_MODEL ?? "gpt-4o-mini",
+    model: resolveModel("openai", "gpt-4o-mini"),
   });
 }

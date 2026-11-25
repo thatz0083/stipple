@@ -34,6 +34,16 @@ export type DemoTrace = {
   // 회피된 외부 호출의 추정 비용. provider별 단가 × 평균 토큰으로 가시화
   // 가능 — 첫 버전에서는 source 데이터로만 두고 UI 노출은 다음 단계.
   costAvoided?: number;
+  // Cloud calls only: concrete model and provider-reported token counts.
+  model?: string;
+  inputTokens?: number;
+  outputTokens?: number;
+  thinkingTokens?: number;
+  // Size (chars) of the system prompt Stipple added to this call.
+  systemPromptChars?: number;
+  // Extra cloud tokens Stipple spent around this call (summary generation).
+  overheadInputTokens?: number;
+  overheadOutputTokens?: number;
 };
 
 export type DemoMetrics = {
@@ -51,6 +61,9 @@ export type DemoMetrics = {
   avgLatencyMs: number;
   // packId → trace count. UI는 PACKS와 join해서 0인 팩도 함께 노출 가능.
   packBreakdown: Record<string, number>;
+  // Sums over traces that carry provider-reported usage.
+  totalInputTokens: number;
+  totalOutputTokens: number;
 };
 
 const STORAGE_KEY = "dots:demo-traces";
@@ -138,6 +151,8 @@ export function getDemoMetrics(): DemoMetrics {
       avoidanceRate: 0,
       avgLatencyMs: 0,
       packBreakdown: {},
+      totalInputTokens: 0,
+      totalOutputTokens: 0,
     };
   }
   let packCount = 0;
@@ -147,6 +162,8 @@ export function getDemoMetrics(): DemoMetrics {
   let localCount = 0;
   let externalCallCount = 0;
   let totalLatency = 0;
+  let totalInputTokens = 0;
+  let totalOutputTokens = 0;
   const packBreakdown: Record<string, number> = {};
   for (const t of traces) {
     if (t.route === "pack") packCount++;
@@ -156,6 +173,8 @@ export function getDemoMetrics(): DemoMetrics {
     else if (t.route === "local") localCount++;
     if (t.externalCall) externalCallCount++;
     totalLatency += t.latencyMs;
+    totalInputTokens += (t.inputTokens ?? 0) + (t.overheadInputTokens ?? 0);
+    totalOutputTokens += (t.outputTokens ?? 0) + (t.overheadOutputTokens ?? 0);
     if (t.packId) {
       packBreakdown[t.packId] = (packBreakdown[t.packId] ?? 0) + 1;
     }
@@ -173,5 +192,7 @@ export function getDemoMetrics(): DemoMetrics {
     avoidanceRate: avoidedCalls / total,
     avgLatencyMs: totalLatency / total,
     packBreakdown,
+    totalInputTokens,
+    totalOutputTokens,
   };
 }

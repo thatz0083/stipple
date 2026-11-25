@@ -1,0 +1,5 @@
+# scenario-pref-switch-v1 PART A — teach on provider X. Then: new thread, reload page, run part B on provider Y.
+I don't like meat.
+I love spicy food.
+I can't stand cilantro.
+What's the capital of Australia?

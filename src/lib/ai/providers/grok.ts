@@ -2,6 +2,7 @@
 // this is just the shared adapter from openai.ts pointed at api.x.ai with Grok's
 // key and model. Key from XAI_API_KEY; model override via LLM_MODEL.
 
+import { resolveModel } from "./config";
 import { openaiCompatibleAdapter } from "./openai";
 import type { LLMInput, LLMOutput } from "./types";
 
@@ -10,6 +11,6 @@ export async function grokAdapter(input: LLMInput): Promise<LLMOutput> {
     label: "Grok",
     baseUrl: "https://api.x.ai/v1",
     apiKey: process.env.XAI_API_KEY,
-    model: process.env.LLM_MODEL ?? "grok-2-latest",
+    model: resolveModel("grok", "grok-2-latest"),
   });
 }

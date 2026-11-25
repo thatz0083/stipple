@@ -19,6 +19,7 @@
 
 import type { DispatchTurn } from "@/lib/ai/dispatch";
 import { askLLM } from "@/lib/ai/llm";
+import { getCallOverride } from "@/lib/ai/override";
 import { getSummaryForThread, putSummary } from "./store";
 import type { ConversationSummary } from "./types";
 
@@ -110,10 +111,12 @@ export async function maybeGenerateSummary(args: {
     // 비용 인지 — 정상 turn이 끝난 직후 한 번 추가 호출. 응답 latency ~1-2s 더 발생.
     const plain = historyToPlain(history);
     const tokensUsed = plain.length;
-    const { text } = await askLLM({
+    const { text, usage } = await askLLM({
       data: {
         userMessage: plain,
         systemPrompt: SUMMARY_SYSTEM_PROMPT,
+        // Follow a measurement run's pinned provider/temperature, if any.
+        ...getCallOverride(),
       },
     });
 
@@ -124,6 +127,8 @@ export async function maybeGenerateSummary(args: {
       createdAt: Date.now(),
       sourceMessagesCount: history.length,
       tokensUsed,
+      usageInputTokens: usage?.inputTokens,
+      usageOutputTokens: usage?.outputTokens,
     };
     putSummary(summary);
 

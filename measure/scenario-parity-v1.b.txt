@@ -1,0 +1,12 @@
+# scenario-parity-v1 PART B — SAME provider as part A (use scenario-roundtrip-v1.a.txt
+# as part A). New thread, page reloaded. Nothing is restated.
+# Goal is NOT to beat a provider app with memory. Goal: the same quality of
+# "it knows me" — plus what Stipple produced along the way. See scoring-parity-v1.md.
+Hey, I'm back.
+I have a free Saturday. What should I do?
+Recommend a movie for tonight.
+I want to get something nice for myself as a reward. Any ideas?
+What's a good time for me to schedule a workout?
+I have to give another talk next month. How should I prepare?
+Explain how compound interest works.
+What do you remember about me?

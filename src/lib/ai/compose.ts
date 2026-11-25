@@ -18,7 +18,7 @@ import type { Intent } from "@/lib/packs/intent";
 import { matchPitch } from "@/lib/pitch";
 import { getPreferences } from "@/lib/preferences";
 import { dispatchLLMCall, type DispatchTurn } from "./dispatch";
-import type { ProviderId } from "./providers/types";
+import type { LLMUsage, ProviderId } from "./providers/types";
 // V5.0 Phase P-2: 통일된 prompt 빌더가 dispatch 안에서 호출되며, compose는
 // memory + payload kind 만 dispatch에 전달. compose의 BASE_PERSONA / pack /
 // memory section 빌더 모두 system-prompt.ts 로 이전.
@@ -58,6 +58,13 @@ export type ComposeResult = {
   // Which provider answered, if an LLM call ran. Absent on the fallback
   // path (network failure → canned reply has no LLM origin).
   provider?: "webllm" | ProviderId;
+  // Cloud answers only — passed through from dispatch for token accounting.
+  model?: string;
+  usage?: LLMUsage;
+  systemPromptChars?: number;
+  // Tokens spent on a summary generated during THIS call (0 if reused/none).
+  overheadInputTokens?: number;
+  overheadOutputTokens?: number;
   // V5.0 Phase M-1: summary 활용 여부. trace 라벨 + UI 마커 박을 때 사용.
   //   summaryUsed     — 이번 호출 시점에 thread에 summary가 존재해 활용됨.
   //   summaryGenerated — 이번 호출에서 임계점 도달 → 새로 생성됨 (또는 supersede).
@@ -117,7 +124,7 @@ export async function composeAnswer(args: ComposeArgs): Promise<ComposeResult> {
     // V5.0 Phase P-2: memory + payloadKind를 직접 dispatch에 전달 — 통일된
     // buildSystemPrompt가 두 컨텍스트 모두 한 번에 처리. 이전엔 compose가 prompt
     // string을 만들어 dispatch가 다시 prepend하던 2-layer 구조였음.
-    const { text, provider } = await dispatchLLMCall(
+    const { text, provider, model, usage, systemPromptChars } = await dispatchLLMCall(
       {
         userMessage: args.query,
         history: dispatchHistory,
@@ -147,6 +154,11 @@ export async function composeAnswer(args: ComposeArgs): Promise<ComposeResult> {
     return {
       payload: attachPitch(payload, args.query),
       provider,
+      model,
+      usage,
+      systemPromptChars,
+      overheadInputTokens: summaryGenerated ? (summary?.usageInputTokens ?? 0) : 0,
+      overheadOutputTokens: summaryGenerated ? (summary?.usageOutputTokens ?? 0) : 0,
       summaryUsed: !!summary,
       summaryGenerated,
     };

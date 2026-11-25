@@ -1,0 +1,60 @@
+# pool-general-v1 — 50 everyday questions. Hand-written; see README limits.
+# --- practical how-to (14)
+How do I get a red wine stain out of a white shirt?
+What's a good way to start running if I haven't exercised in years?
+How do I descale an electric kettle?
+My houseplant's leaves are turning yellow. What should I check?
+How do I write a polite email asking for a deadline extension?
+What's the best way to memorize a presentation in two days?
+How can I fall asleep faster without medication?
+How do I split a restaurant bill fairly when some people didn't drink?
+What should I pack for a three-day business trip?
+How do I back up photos from my phone to my laptop?
+How do I prepare for a job interview at a small company?
+What's a simple way to track my monthly spending?
+How do I remove a stripped screw?
+How do I politely decline a meeting invitation?
+# --- seeking information (14)
+Why is the sky blue?
+What is the difference between a virus and a bacterium?
+Who wrote One Hundred Years of Solitude?
+What causes inflation?
+How does a heat pump work?
+What's the difference between baking soda and baking powder?
+When did the Berlin Wall fall?
+What is a black hole?
+Why do onions make you cry?
+What does GDP measure?
+What's the capital of Australia?
+How long does it take light from the Sun to reach Earth?
+What is the difference between weather and climate?
+What does "carbon neutral" mean?
+# --- writing (8)
+Write a two-sentence thank-you note to a colleague who covered my shift.
+Rewrite this to sound more professional: "hey, can u send me that file asap"
+Give me three title ideas for a blog post about learning to cook.
+Summarize the plot of Romeo and Juliet in three sentences.
+Write a short out-of-office message for next week.
+Fix the grammar: "Me and him goes to the store yesterday."
+Write a one-paragraph product description for a stainless steel water bottle.
+Translate "Where is the nearest train station?" into Japanese.
+# --- math and quick lookups (6)
+24234 * 23
+What is 15% of 80?
+1250 / 8
+What's 2 to the power of 10?
+Convert 5 miles to kilometers.
+What is the square root of 144?
+# --- food and recommendations (4)
+What should I cook for dinner tonight?
+Give me a recipe for bibimbap.
+How do I make bulgogi?
+What's a quick lunch I can make in ten minutes?
+# --- code (2)
+Write a Python function that reverses a string.
+What does "git rebase" do?
+# --- chit-chat and repeats (2 + repeats of earlier lines)
+Hi
+Thanks, that helped.
+Why is the sky blue?
+What is 15% of 80?

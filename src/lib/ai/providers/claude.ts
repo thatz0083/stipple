@@ -8,11 +8,13 @@
 // default model claude-haiku-4-5 (cheapest/fastest, fits short chat replies),
 // overridable via LLM_MODEL.
 
+import { requestedTemperature, resolveMaxOutputTokens, resolveModel } from "./config";
 import type { LLMInput, LLMOutput } from "./types";
 
 type AnthropicResponse = {
   content?: Array<{ type?: string; text?: string }>;
   stop_reason?: string;
+  usage?: { input_tokens?: number; output_tokens?: number };
   error?: { message?: string };
 };
 
@@ -22,7 +24,8 @@ export async function claudeAdapter(input: LLMInput): Promise<LLMOutput> {
     throw new Error("ANTHROPIC_API_KEY is not configured");
   }
 
-  const model = process.env.LLM_MODEL ?? "claude-haiku-4-5";
+  const model = resolveModel("claude", "claude-haiku-4-5");
+  const temperature = requestedTemperature(input);
 
   const messages = [
     ...(input.history ?? []).map((t) => ({ role: t.role, content: t.content })),
@@ -38,7 +41,9 @@ export async function claudeAdapter(input: LLMInput): Promise<LLMOutput> {
     },
     body: JSON.stringify({
       model,
-      max_tokens: 800,
+      max_tokens: resolveMaxOutputTokens(input),
+      // Only sent when a caller asks for one — default path keeps the API default.
+      ...(temperature !== undefined ? { temperature } : {}),
       ...(input.systemPrompt ? { system: input.systemPrompt } : {}),
       messages,
     }),
@@ -61,5 +66,13 @@ export async function claudeAdapter(input: LLMInput): Promise<LLMOutput> {
     throw new Error("Claude returned no text");
   }
 
-  return { text: text.trim() };
+  const u = json.usage;
+  const usage =
+    u && typeof u.input_tokens === "number"
+      ? { inputTokens: u.input_tokens, outputTokens: u.output_tokens ?? 0 }
+      : undefined;
+
+  const truncated = json.stop_reason === "max_tokens";
+
+  return { text: text.trim(), model, usage, truncated };
 }

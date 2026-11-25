@@ -17,9 +17,12 @@ const ADAPTERS: Record<ProviderId, LLMAdapter> = {
   grok: grokAdapter,
 };
 
-export function selectProvider(): { id: ProviderId; adapter: LLMAdapter } {
-  const raw = (process.env.LLM_PROVIDER ?? "gemini").toLowerCase();
-  const id: ProviderId = raw in ADAPTERS ? (raw as ProviderId) : "gemini";
+// `requested` is the optional per-request override (LLMInput.provider). It is
+// client-supplied, so it is checked with hasOwn — `in` would also accept
+// inherited keys like "constructor".
+export function selectProvider(requested?: string): { id: ProviderId; adapter: LLMAdapter } {
+  const raw = String(requested ?? process.env.LLM_PROVIDER ?? "gemini").toLowerCase();
+  const id: ProviderId = Object.hasOwn(ADAPTERS, raw) ? (raw as ProviderId) : "gemini";
   if (id !== raw && import.meta.env.DEV) {
     console.warn(`[llm] unknown LLM_PROVIDER "${raw}" — falling back to gemini`);
   }

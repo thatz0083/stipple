@@ -9,19 +9,30 @@
 
 import { createServerFn } from "@tanstack/react-start";
 import { selectProvider } from "./providers";
-import type { LLMHistoryTurn, LLMInput, LLMOutput, ProviderId } from "./providers/types";
+import type { LLMHistoryTurn, LLMInput, LLMOutput, LLMUsage, ProviderId } from "./providers/types";
 
-export type { LLMHistoryTurn, LLMInput, LLMOutput, ProviderId };
+export type { LLMHistoryTurn, LLMInput, LLMOutput, LLMUsage, ProviderId };
 
 export type AskLLMResult = {
   text: string;
   provider: ProviderId;
+  // Concrete model that answered + provider-reported token counts. Used by the
+  // measurement harness; the chat UI can ignore them.
+  model: string;
+  usage?: LLMUsage;
+  truncated?: boolean;
 };
 
 export const askLLM = createServerFn({ method: "POST" })
   .validator((data: LLMInput) => data)
   .handler(async ({ data }): Promise<AskLLMResult> => {
-    const { id, adapter } = selectProvider();
-    const { text } = await adapter(data);
-    return { text, provider: id };
+    const { id, adapter } = selectProvider(data.provider);
+    const out = await adapter(data);
+    return {
+      text: out.text,
+      provider: id,
+      model: out.model,
+      usage: out.usage,
+      truncated: out.truncated,
+    };
   });
